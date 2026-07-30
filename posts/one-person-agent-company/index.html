@@ -1,0 +1,43 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f5f0e8"><meta name="description" content="我把一群 AI Agent 分成产品、工程和审查角色，让它们为一个真实 App 工作。真正让我觉得它们像一家公司的，不是角色名称，而是一次在手机上跑通的真实交付。"><meta name="generator" content="Astro v7.1.6"><link rel="canonical" href="https://codier.github.io/posts/one-person-agent-company/"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="alternate" type="application/rss+xml" title="Codier RSS" href="/rss.xml"><meta property="og:site_name" content="Codier"><meta property="og:type" content="article"><meta property="og:locale" content="zh_CN"><meta property="og:title" content="我用几天时间，组建了一家只有一个人的 Agent 公司 · Codier"><meta property="og:description" content="我把一群 AI Agent 分成产品、工程和审查角色，让它们为一个真实 App 工作。真正让我觉得它们像一家公司的，不是角色名称，而是一次在手机上跑通的真实交付。"><meta property="og:url" content="https://codier.github.io/posts/one-person-agent-company/"><meta property="article:published_time" content="2026-07-30T00:00:00.000Z"><title>我用几天时间，组建了一家只有一个人的 Agent 公司 · Codier</title><link rel="stylesheet" href="/_astro/BaseLayout.Cqq5Z-j5.css"></head><body><a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="wordmark" href="/" aria-label="Codier 首页">Codier</a><nav aria-label="主导航"><a href="/#articles">文章</a><a href="/rss.xml">RSS</a></nav></div></header><main id="main-content"><article class="article-shell"><header class="article-header"><a class="back-link" href="/">← 返回首页</a><p class="eyebrow">实践记录</p><h1>我用几天时间，组建了一家只有一个人的 Agent 公司</h1><p class="article-summary">我把一群 AI Agent 分成产品、工程和审查角色，让它们为一个真实 App 工作。真正让我觉得它们像一家公司的，不是角色名称，而是一次在手机上跑通的真实交付。</p><div class="article-meta"><time datetime="2026-07-30T00:00:00.000Z">2026年7月30日</time><span aria-hidden="true">·</span><span>ai-agent / agent-company / intent-home / 创业</span></div></header><section class="audio-card" aria-labelledby="audio-title"><div class="audio-heading"><div><p class="eyebrow">语音版</p><h2 id="audio-title">我用几天时间，组建了一家只有一个人的 Agent 公司</h2></div><a class="download-link" href="/posts/one-person-agent-company/audio/one-person-agent-company.mp3" download>下载 MP3</a></div><audio controls preload="metadata" src="/posts/one-person-agent-company/audio/one-person-agent-company.mp3">你的浏览器不支持音频播放，可以<a href="/posts/one-person-agent-company/audio/one-person-agent-company.mp3" download>直接下载 MP3</a>。</audio></section><div class="article-body"><p>几天前，我做了一个很奇怪的实验：我试着让一群 AI Agent 像一家公司一样工作。</p>
+<p>我给它们安排了 Product、Engineering、CTO、Security 和 QA 等角色。每个 Agent 有自己的频道、职责和工作线程。我希望自己只负责方向和关键决定，不再亲自写每一段代码，也不再充当它们之间的传话人。</p>
+<p>我们要做的产品叫 Intent Home，是一个运行在 Android 手机上的 Agent App。</p>
+<p>有一天晚上，几个 Agent 正在不同频道里工作。有人处理产品，有人修后端，有人构建 APK，也有人检查这个版本能不能安装到我的 OPPO 手机上。</p>
+<p>我看着它们来回汇报，突然问了一句：</p>
+<blockquote>
+<p>“So, are you guys all there?”</p>
+</blockquote>
+<p>很快，几个频道里传来了回复。</p>
+<p>真正让我吃惊的不是它们会说话，而是它们开始表现出不同的工作方式。Product 很会整理需求，CTO 擅长把复杂问题拆成结构和边界，Reviewer 则会在所有测试看起来正常时阻止一个有风险的版本发布。</p>
+<p>那一刻，它们不再像几个孤立的聊天窗口，更像一个团队。</p>
+<p>但这个团队真正的考验，不是能不能写出漂亮的方案，而是能不能把一个真实功能送到我的手机上。</p>
+<p>我们选择的第一个完整功能是图片文字翻译。需求非常简单：旅行时看到菜单、标牌或者商品上的陌生文字，拍一下，就能看到中文翻译。</p>
+<p>完整路径只有：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>拍照 → 识别文字 → 调用真实后端翻译 → 回到 App 展示结果</span></span></code></pre>
+<p>我要求它不能使用提前准备的答案，也不能因为代码已经提交、测试已经通过，就说功能完成了。同一个 APK 必须真的安装到手机上，再用一张开发前没有见过的图片跑通。</p>
+<p>第一次测试很快失败了。</p>
+<p>手机成功识别了文字，但调用后端时返回了一个 401 错误。服务器还把登录凭证绑定在旧的设备身份上，所以当前手机虽然拿着正确的凭证，仍然被拒绝。</p>
+<p>工程 Agent 检查数据库，找到旧绑定，备份状态后修复它，然后让我再拍一次。</p>
+<p>这一次，真实翻译从后端返回了。</p>
+<p>我当时说：</p>
+<blockquote>
+<p>“Success! Now you need to bring that translation back into the UI.”</p>
+<p>“That’s great success, team!”</p>
+</blockquote>
+<p>现在回头看，这可能是整个实验里最重要的一刻。</p>
+<p>我没有提前决定要把这些 Agent 叫作 team。这个词是在真实结果第一次回到手机上时自然说出来的。</p>
+<p>而且庆祝只持续了一句话。下一句话马上又变成了产品要求：现在，把翻译结果带回 App 的界面。</p>
+<p>这几天也让我发现，Agent 公司并不会自动运转。</p>
+<p>Agent 会中断，会在 push 代码之前退出，也会因为没有 GitHub 权限而停住。两个 Agent 可能同时修改同一个文件。一个 APK 即使通过了构建、测试和签名检查，也可能因为缺少联网权限而不能发布。</p>
+<p>所以，创建很多 Agent 并不难。真正困难的是，让它们诚实地说清楚什么已经完成，什么只是看起来快完成了。</p>
+<p>一个频道不等于一个正在工作的员工。一个 commit 不等于功能已经交付。一个 APK 也不等于用户已经获得价值。</p>
+<p>我也没有因此获得一家完全不需要人的“无人公司”。</p>
+<p>我仍然需要决定做什么、不做什么；需要在团队想继续扩大范围时说“现在不要做”；需要给高风险动作授权；也需要亲自在手机上判断结果是不是我想要的。</p>
+<p>只是我的工作发生了变化。</p>
+<p>我不再亲自完成所有实现，而是越来越集中在目标、判断、授权和最终体验上。</p>
+<p>我现在仍然不知道，这能不能算一家真正的公司。</p>
+<p>但当真实翻译第一次回到我的手机上，我脱口而出：</p>
+<blockquote>
+<p>“That’s great success, team!”</p>
+</blockquote>
+<p>然后，我们继续做下一个功能。</p>
+</div><footer class="article-end"><span aria-hidden="true"></span><p>这篇记录到这里。</p><a href="/">继续读其他文章</a></footer></article></main><footer class="site-footer"><div><span>Codier</span><span>记录与 AI agent 一起工作的现场。</span></div></footer></body></html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html><html lang="en" data-current-language="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f5f0e8"><meta name="description" content="I split a group of AI agents into product, engineering, and review roles, then put them to work on a real app. What made them feel like a company was not the org chart. It was the first real delivery that worked on my phone."><meta name="generator" content="Astro v7.1.6"><link rel="canonical" href="https://codier.github.io/en/posts/one-person-agent-company/"><link rel="alternate" hreflang="en" href="https://codier.github.io/en/posts/one-person-agent-company/"><link rel="alternate" hreflang="zh-CN" href="https://codier.github.io/posts/one-person-agent-company/"><link rel="alternate" hreflang="x-default" href="https://codier.github.io/posts/one-person-agent-company/"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="alternate" type="application/rss+xml" title="Codier English RSS" href="/en/rss.xml"><meta property="og:site_name" content="Codier"><meta property="og:type" content="article"><meta property="og:locale" content="en_US"><meta property="og:title" content="I Built a One-Person Agent Company in a Few Days · Codier"><meta property="og:description" content="I split a group of AI agents into product, engineering, and review roles, then put them to work on a real app. What made them feel like a company was not the org chart. It was the first real delivery that worked on my phone."><meta property="og:url" content="https://codier.github.io/en/posts/one-person-agent-company/"><meta property="article:published_time" content="2026-07-30T00:00:00.000Z"><title>I Built a One-Person Agent Company in a Few Days · Codier</title><link rel="stylesheet" href="/_astro/BaseLayout.C0Il_AHh.css"></head><body data-alternate-path="/posts/one-person-agent-company/"><a class="skip-link" href="#main-content">Skip to content</a><header class="site-header"><div class="header-inner"><a class="wordmark" href="/en/" aria-label="Codier home">Codier</a><div class="header-actions"><nav aria-label="Main navigation"><a href="/en/#articles">Articles</a><a href="/en/rss.xml">RSS</a></nav><a class="language-switch" href="/posts/one-person-agent-company/#language-zh" hreflang="zh-CN" data-language-switch="zh" aria-label="切换到中文">中文</a></div></div></header><main id="main-content"><article class="article-shell"><header class="article-header"><a class="back-link" href="/en/">← Back home</a><p class="eyebrow">Field notes</p><h1>I Built a One-Person Agent Company in a Few Days</h1><p class="article-summary">I split a group of AI agents into product, engineering, and review roles, then put them to work on a real app. What made them feel like a company was not the org chart. It was the first real delivery that worked on my phone.</p><div class="article-meta"><time datetime="2026-07-30T00:00:00.000Z">July 30, 2026</time><span aria-hidden="true">·</span><span>ai-agents / agent-company / intent-home / startups</span></div></header><section class="audio-card" aria-labelledby="audio-title-en"><div class="audio-heading"><div><p class="eyebrow">Audio edition</p><h2 id="audio-title-en">I Built a One-Person Agent Company in a Few Days</h2></div><a class="download-link" href="/posts/one-person-agent-company/audio/one-person-agent-company-en.mp3" download>Download MP3</a></div><audio controls preload="metadata" src="/posts/one-person-agent-company/audio/one-person-agent-company-en.mp3">Your browser cannot play this audio. <a href="/posts/one-person-agent-company/audio/one-person-agent-company-en.mp3" download>Download the MP3 instead.</a></audio></section><div class="article-body"><p>A few days ago, I tried a strange experiment: I asked a group of AI agents to work like a company.</p>
+<p>I gave them roles in Product, Engineering, CTO, Security, and QA. Each agent had its own channel, responsibilities, and work thread. I wanted to focus on direction and the few decisions that really needed me. I did not want to write every line of code or act as the go-between for the agents.</p>
+<p>The product was called Intent Home, an agent app that runs on Android.</p>
+<p>One night, several agents were working in separate channels. One was handling product decisions. Another was fixing the backend. A third was building an APK, while someone else checked whether that build could actually be installed on my OPPO phone.</p>
+<p>I looked at all those conversations and asked:</p>
+<blockquote>
+<p>“So, are you guys all there?”</p>
+</blockquote>
+<p>Replies came back from several channels.</p>
+<p>What surprised me was not that the agents could answer. They had started to work differently. Product was good at turning loose ideas into requirements. The CTO agent was good at structure and boundaries. A reviewer would block a risky release even when all the tests appeared to be passing.</p>
+<p>For a moment, they felt less like isolated chat windows and more like a team.</p>
+<p>But the real test was not whether they could produce polished plans. It was whether they could put a working feature on my phone.</p>
+<p>We chose image translation as the first complete workflow. The need was simple: when I saw a menu, sign, or product label in a language I could not read, I wanted to take a photo and get a Chinese translation.</p>
+<p>The path was short:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>Take a photo → recognize the text → send it to the real translation backend → show the result in the app</span></span></code></pre>
+<p>I would not accept a prepared answer. A commit did not count as done. Passing tests did not count as done. The same APK had to be installed on the phone and tested with an image nobody had seen during development.</p>
+<p>The first attempt failed.</p>
+<p>The phone recognized the text, but the backend returned a 401. The server still tied the login credential to an old device identity, so it rejected the current phone even though the credential itself was correct.</p>
+<p>The engineering agent inspected the database, found the old binding, backed up the state, fixed it, and asked me to try again.</p>
+<p>This time, the backend returned a real translation.</p>
+<p>I said:</p>
+<blockquote>
+<p>“Success! Now you need to bring that translation back into the UI.”</p>
+<p>“That’s great success, team!”</p>
+</blockquote>
+<p>Looking back, that may have been the most important moment in the experiment.</p>
+<p>I had not decided in advance to call these agents a team. The word came out naturally when a real result reached my phone.</p>
+<p>The celebration lasted one sentence. The next sentence was another product requirement: now bring the translation back into the app.</p>
+<p>The experiment also showed me that an agent company does not run by itself.</p>
+<p>Agents stop mid-task. They exit before pushing code. They get blocked by missing GitHub permissions. Two of them can edit the same file at once. An APK can pass its build, tests, and signature checks, then still be unusable because it is missing network permission.</p>
+<p>Creating more agents is easy. Getting them to report honestly on what is done, what is nearly done, and what merely looks close to done is much harder.</p>
+<p>A channel is not an employee at work. A commit is not a delivered feature. An APK is not value in the user’s hands.</p>
+<p>I did not end up with a company that could operate without a human. I still had to decide what to build and what not to build; say “not now” when the team wanted to expand the scope; authorize risky actions; and judge on my phone whether the result was actually what I wanted.</p>
+<p>My job changed, though.</p>
+<p>I spent less time implementing everything myself and more time setting goals, making judgments, granting permission, and testing the final experience.</p>
+<p>I still do not know whether this counts as a real company.</p>
+<p>But when the first real translation came back to my phone, I heard myself say:</p>
+<blockquote>
+<p>“That’s great success, team!”</p>
+</blockquote>
+<p>Then we moved on to the next feature.</p>
+</div><footer class="article-end"><span aria-hidden="true"></span><p>That's it for this entry.</p><a href="/en/">Read the other articles</a></footer></article></main><footer class="site-footer"><div><span>Codier</span><span>Field notes from working with AI agents.</span></div></footer><script>(function(){const lang = "en";
+const alternatePath = "/posts/one-person-agent-company/";
+
+      (() => {
+        const storageKey = 'codier-language';
+        const currentLanguage = lang;
+        const counterpart = alternatePath;
+        let preference = null;
+
+        try {
+          preference = localStorage.getItem(storageKey);
+        } catch {
+          preference = null;
+        }
+
+        const explicitLanguage = location.hash === '#language-zh'
+          ? 'zh'
+          : location.hash === '#language-en' ? 'en' : null;
+
+        if (explicitLanguage) {
+          try {
+            localStorage.setItem(storageKey, explicitLanguage);
+            preference = explicitLanguage;
+          } catch {
+            preference = explicitLanguage;
+          }
+        }
+
+        const browserLanguage = (navigator.languages?.[0] || navigator.language || '').toLowerCase();
+        const desiredLanguage = explicitLanguage || (preference === 'zh' || preference === 'en'
+          ? preference
+          : browserLanguage.startsWith('zh') ? 'zh' : 'en');
+
+        if (desiredLanguage !== currentLanguage) {
+          location.replace(counterpart);
+          return;
+        }
+
+        document.querySelector('[data-language-switch]')?.addEventListener('click', (event) => {
+          const target = event.currentTarget.getAttribute('data-language-switch');
+          if (target !== 'zh' && target !== 'en') return;
+          try {
+            localStorage.setItem(storageKey, target);
+          } catch {
+            // The normal language link still works when storage is unavailable.
+          }
+        });
+      })();
+    })();</script></body></html>

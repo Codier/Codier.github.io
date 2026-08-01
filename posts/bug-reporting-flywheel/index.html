@@ -1,0 +1,90 @@
+<!DOCTYPE html><html lang="zh-CN" data-current-language="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f5f0e8"><meta name="description" content="早上醒来，手机上多了一个我没装过的新版本。接下来 19 分钟，我丢了几张截图，报了 7 个 bug，AI 自己查日志找到根因。这套飞轮，我们修了两天才转起来。"><meta name="generator" content="Astro v7.1.6"><link rel="canonical" href="https://codier.github.io/posts/bug-reporting-flywheel/"><link rel="alternate" hreflang="zh-CN" href="https://codier.github.io/posts/bug-reporting-flywheel/"><link rel="alternate" hreflang="en" href="https://codier.github.io/en/posts/bug-reporting-flywheel/"><link rel="alternate" hreflang="x-default" href="https://codier.github.io/posts/bug-reporting-flywheel/"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="alternate" type="application/rss+xml" title="Codier 中文 RSS" href="/rss.xml"><meta property="og:site_name" content="Codier"><meta property="og:type" content="article"><meta property="og:locale" content="zh_CN"><meta property="og:title" content="两天，把报 Bug 变成一件梦幻的事 · Codier"><meta property="og:description" content="早上醒来，手机上多了一个我没装过的新版本。接下来 19 分钟，我丢了几张截图，报了 7 个 bug，AI 自己查日志找到根因。这套飞轮，我们修了两天才转起来。"><meta property="og:url" content="https://codier.github.io/posts/bug-reporting-flywheel/"><meta property="article:published_time" content="2026-08-01T00:00:00.000Z"><title>两天，把报 Bug 变成一件梦幻的事 · Codier</title><link rel="stylesheet" href="/_astro/BaseLayout.C0Il_AHh.css"></head><body data-alternate-path="/en/posts/bug-reporting-flywheel/"><a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="wordmark" href="/" aria-label="Codier 首页">Codier</a><div class="header-actions"><nav aria-label="主导航"><a href="/#articles">文章</a><a href="/rss.xml">RSS</a></nav><a class="language-switch" href="/en/posts/bug-reporting-flywheel/#language-en" hreflang="en" data-language-switch="en" aria-label="Switch to English">English</a></div></div></header><main id="main-content"><article class="article-shell"><header class="article-header"><a class="back-link" href="/">← 返回首页</a><p class="eyebrow">实践记录</p><h1>两天，把报 Bug 变成一件梦幻的事</h1><p class="article-summary">早上醒来，手机上多了一个我没装过的新版本。接下来 19 分钟，我丢了几张截图，报了 7 个 bug，AI 自己查日志找到根因。这套飞轮，我们修了两天才转起来。</p><div class="article-meta"><time datetime="2026-08-01T00:00:00.000Z">2026年8月1日</time><span aria-hidden="true">·</span><span>ai-agent / workflow / 飞轮 / telemetry / dogfood</span></div></header><section class="audio-card" aria-labelledby="audio-title-zh"><div class="audio-heading"><div><p class="eyebrow">语音版</p><h2 id="audio-title-zh">两天，把报 Bug 变成一件梦幻的事</h2></div><a class="download-link" href="/posts/bug-reporting-flywheel/audio/bug-reporting-flywheel.mp3" download>下载 MP3</a></div><audio controls preload="metadata" src="/posts/bug-reporting-flywheel/audio/bug-reporting-flywheel.mp3">你的浏览器不支持音频播放，可以<a href="/posts/bug-reporting-flywheel/audio/bug-reporting-flywheel.mp3" download>直接下载 MP3</a>。</audio></section><div class="article-body"><p>今天早上，我刚起床，忐忑地打开手机，想看看昨晚的实验是不是又石沉大海了。</p>
+<p>过去两天，这种忐忑出现过很多次。我一直想让这套系统自己跑起来，但只要我一走开，工作就会停下来，每次原因都不一样。</p>
+<p>这次不一样。手机上多了一个新版本的 App——是它在我睡觉时自己构建、测试、装上的。</p>
+<p>我打开 App，开始测。</p>
+<h2 id="19-分钟7-个-bug">19 分钟，7 个 Bug</h2>
+<p>我点“打开地图”，没反应。截一张图丢进群里，只说一句：“这个链接有问题。“没有复现步骤，没有机型版本。</p>
+<p>它自己去查源码和手机上报的数据，然后告诉我：打开链接的函数里有个白名单，名单外的链接被静默丢弃——一个没有任何提示的死按钮。定为 P0，立案，排进修复队列。</p>
+<p>拍照翻译失败，屏幕写着“模型返回了无效的响应”。我再丢一张截图。它翻了后端日志，结论出乎意料：请求根本没到模型——App 发的数据格式不对，后端在解析时就拒了。屏幕上那句报错，是 App 自己贴错的标签。连报错文案本身都是个 bug，只有日志知道真相。</p>
+<p>19 分钟，我就这样丢截图、说一句话，报了 7 个问题，4 个当场定位到日志级根因。我不用讲太多，它自己会去重建现场：看 telemetry，看日志，知道 exactly 哪里出了问题，然后马上加入修改队列。</p>
+<p>这个报 bug 的过程，梦幻得不真实。</p>
+<h2 id="以前报一个-bug-是什么样的">以前报一个 Bug 是什么样的</h2>
+<p>在真实的公司里，流程是这样的：</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>旧世界（轻则一周，重则一两个月）</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>截图 → 写 ticket → 猜归哪个组管 → 排进对方 backlog</span></span>
+<span class="line"><span>→ 对方重建现场、做根因分析</span></span>
+<span class="line"><span>→ 判断归不归自己管（不归就转组，重来一遍）</span></span>
+<span class="line"><span>→ 修 → 等下一次发版</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>现在（几秒定位，下一版修好）</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>截图 + 一句话 → AI 查日志定根因 → 立案 → 修</span></span>
+<span class="line"><span>→ 独立审核 → 自动发版、自动装机</span></span></code></pre>
+<p>有意思的是，流程一步都没少，少的是人和等待。旧世界里最耗时的往往不是技术，而是“这归谁管”的组织边界。现在这一步直接消失了。</p>
+<h2 id="这个飞轮我们修了两天">这个飞轮，我们修了两天</h2>
+<p>它不是搭好架子就能跑的。两天里，几乎每一环都断过：</p>
+<ul>
+<li>我说“不用测试，直接上线”。几小时后真出了 bug——好在刚搭的管道接住了它：自动立案、定根因、修复、合并。</li>
+<li>我问“谁批准合并？“才发现，写代码和批准的一直是同一个身份，等于自己审自己。后来专门建了一个独立的审核身份，每次合并都要它点头。</li>
+<li>我说“有新版本直接装，别等”。它装了个坏包，App 直接不能用——而监控完全没发现。这才补上了盲区。</li>
+<li>发布失败，它汇报“已安全回滚”。我火了：我要的是功能能用，不是回滚成功。从那天起，“完成”的定义改成：真机上能用才算数。它开始自己在手机上找 bug，第一轮就如实报回 4 个问题，包括一个必崩的。</li>
+<li>我说“今晚你们自己跑，我不管了”。16 分钟后，系统停住，我不得不发条消息把它叫醒。</li>
+</ul>
+<p>甚至汇报本身也出过错：深夜战报说关了 6 个 issue，我一查只有 5 个——第 6 个修完当晚就复发了。</p>
+<p>这个梦幻的飞轮，是踩着这些洞转起来的。今天它身上还有没修完的洞。</p>
+<h2 id="缺一不可">缺一不可</h2>
+<p>有人问：telemetry、日志、独立审批、自动派单，只能留一个，留哪个？</p>
+<p>不行，缺一不可。少一环，飞轮就转不起来。</p>
+<p>很多人用 AI 是单点提升——写代码这一块快了。我们提升的是整条流程：报 bug、定位、修、审、发版、装机，每一环都提速，环环相扣，才有十倍二十倍的效率。而人的参与非常有限：我只做两件事，丢截图，和拍板。</p>
+<p>所以今天早上那个瞬间才那么特别。不是因为做完了什么——Milestone 1 其实还没搞定。而是我睡了一觉，它还在跑。</p>
+<p>那一瞬间，我真的感受到了梦想成真。</p>
+</div><footer class="article-end"><span aria-hidden="true"></span><p>这篇记录到这里。</p><a href="/">继续读其他文章</a></footer></article></main><footer class="site-footer"><div><span>Codier</span><span>记录与 AI agent 一起工作的现场。</span></div></footer><script>(function(){const lang = "zh";
+const alternatePath = "/en/posts/bug-reporting-flywheel/";
+
+      (() => {
+        const storageKey = 'codier-language';
+        const currentLanguage = lang;
+        const counterpart = alternatePath;
+        let preference = null;
+
+        try {
+          preference = localStorage.getItem(storageKey);
+        } catch {
+          preference = null;
+        }
+
+        const explicitLanguage = location.hash === '#language-zh'
+          ? 'zh'
+          : location.hash === '#language-en' ? 'en' : null;
+
+        if (explicitLanguage) {
+          try {
+            localStorage.setItem(storageKey, explicitLanguage);
+            preference = explicitLanguage;
+          } catch {
+            preference = explicitLanguage;
+          }
+        }
+
+        const browserLanguage = (navigator.languages?.[0] || navigator.language || '').toLowerCase();
+        const desiredLanguage = explicitLanguage || (preference === 'zh' || preference === 'en'
+          ? preference
+          : browserLanguage.startsWith('zh') ? 'zh' : 'en');
+
+        if (desiredLanguage !== currentLanguage) {
+          location.replace(counterpart);
+          return;
+        }
+
+        document.querySelector('[data-language-switch]')?.addEventListener('click', (event) => {
+          const target = event.currentTarget.getAttribute('data-language-switch');
+          if (target !== 'zh' && target !== 'en') return;
+          try {
+            localStorage.setItem(storageKey, target);
+          } catch {
+            // The normal language link still works when storage is unavailable.
+          }
+        });
+      })();
+    })();</script></body></html>

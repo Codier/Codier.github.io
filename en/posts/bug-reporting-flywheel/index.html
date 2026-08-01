@@ -1,0 +1,93 @@
+<!DOCTYPE html><html lang="en" data-current-language="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f5f0e8"><meta name="description" content="I woke up to find a new build on my phone that I never installed. Over the next 19 minutes, I dropped a few screenshots, filed 7 bugs, and the AI traced root causes from its own logs. This flywheel took us two days of breakage to get spinning."><meta name="generator" content="Astro v7.1.6"><link rel="canonical" href="https://codier.github.io/en/posts/bug-reporting-flywheel/"><link rel="alternate" hreflang="en" href="https://codier.github.io/en/posts/bug-reporting-flywheel/"><link rel="alternate" hreflang="zh-CN" href="https://codier.github.io/posts/bug-reporting-flywheel/"><link rel="alternate" hreflang="x-default" href="https://codier.github.io/posts/bug-reporting-flywheel/"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="alternate" type="application/rss+xml" title="Codier English RSS" href="/en/rss.xml"><meta property="og:site_name" content="Codier"><meta property="og:type" content="article"><meta property="og:locale" content="en_US"><meta property="og:title" content="Two Days to Make Bug Reporting Feel Like Magic · Codier"><meta property="og:description" content="I woke up to find a new build on my phone that I never installed. Over the next 19 minutes, I dropped a few screenshots, filed 7 bugs, and the AI traced root causes from its own logs. This flywheel took us two days of breakage to get spinning."><meta property="og:url" content="https://codier.github.io/en/posts/bug-reporting-flywheel/"><meta property="article:published_time" content="2026-08-01T00:00:00.000Z"><title>Two Days to Make Bug Reporting Feel Like Magic · Codier</title><link rel="stylesheet" href="/_astro/BaseLayout.C0Il_AHh.css"></head><body data-alternate-path="/posts/bug-reporting-flywheel/"><a class="skip-link" href="#main-content">Skip to content</a><header class="site-header"><div class="header-inner"><a class="wordmark" href="/en/" aria-label="Codier home">Codier</a><div class="header-actions"><nav aria-label="Main navigation"><a href="/en/#articles">Articles</a><a href="/en/rss.xml">RSS</a></nav><a class="language-switch" href="/posts/bug-reporting-flywheel/#language-zh" hreflang="zh-CN" data-language-switch="zh" aria-label="切换到中文">中文</a></div></div></header><main id="main-content"><article class="article-shell"><header class="article-header"><a class="back-link" href="/en/">← Back home</a><p class="eyebrow">Field notes</p><h1>Two Days to Make Bug Reporting Feel Like Magic</h1><p class="article-summary">I woke up to find a new build on my phone that I never installed. Over the next 19 minutes, I dropped a few screenshots, filed 7 bugs, and the AI traced root causes from its own logs. This flywheel took us two days of breakage to get spinning.</p><div class="article-meta"><time datetime="2026-08-01T00:00:00.000Z">August 1, 2026</time><span aria-hidden="true">·</span><span>ai-agents / workflow / flywheel / telemetry / dogfooding</span></div></header><section class="audio-card" aria-labelledby="audio-title-en"><div class="audio-heading"><div><p class="eyebrow">Audio edition</p><h2 id="audio-title-en">Two Days to Make Bug Reporting Feel Like Magic</h2></div><a class="download-link" href="/posts/bug-reporting-flywheel/audio/bug-reporting-flywheel-en.mp3" download>Download MP3</a></div><audio controls preload="metadata" src="/posts/bug-reporting-flywheel/audio/bug-reporting-flywheel-en.mp3">Your browser cannot play this audio. <a href="/posts/bug-reporting-flywheel/audio/bug-reporting-flywheel-en.mp3" download>Download the MP3 instead.</a></audio></section><div class="article-body"><p>This morning I woke up, picked up my phone with some anxiety, and checked whether last night’s experiment had quietly died again.</p>
+<p>Over the past two days, that anxiety had become familiar. I kept trying to get this system to run on its own, but every time I stepped away, the work stopped. A different reason every time.</p>
+<p>This time was different. There was a new version of the App on my phone — built, tested, and installed by the system while I was asleep.</p>
+<p>I opened it and started testing.</p>
+<h2 id="19-minutes-7-bugs">19 Minutes, 7 Bugs</h2>
+<p>I tapped “Open map.” Nothing happened. I took a screenshot, dropped it in the chat, and said one sentence: “This link is broken.” No reproduction steps. No device model, no version number.</p>
+<p>It went and checked the source code and the telemetry from my phone, then came back with an answer: the link-opening function had a domain whitelist, and anything outside the list was silently dropped — a dead button with no error and no hint. It filed the bug as a P0 and put it in the fix queue.</p>
+<p>Photo translation failed next. The screen said, “The model returned an invalid response.” I dropped another screenshot. It read the backend logs and found something I did not expect: the request had never reached the model at all. The App was sending data that didn’t match the API contract, and the backend rejected it at the parsing step. The error message on my screen was a mislabel — the App blaming the model for its own bug.</p>
+<p>Even the error message itself was a bug. You could stare at that screen forever and never know. Only the logs knew the truth.</p>
+<p>In 19 minutes, I filed 7 issues this way — a screenshot and one sentence each. Four of them got traced to log-level or source-level root causes on the spot. I didn’t have to explain much. It reconstructed what happened on its own: it read the telemetry, read the logs, knew exactly where things broke, and put each fix in the queue.</p>
+<p>The whole experience felt unreal.</p>
+<h2 id="what-reporting-a-bug-used-to-look-like">What Reporting a Bug Used to Look Like</h2>
+<p>At a real company, the process goes like this:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>The old world (a week at best, one or two months at worst)</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Screenshot → write a ticket → guess which team owns it</span></span>
+<span class="line"><span>→ wait in their backlog</span></span>
+<span class="line"><span>→ they reconstruct the scene, run root-cause analysis</span></span>
+<span class="line"><span>→ decide whether it's really theirs (if not, reassign and start over)</span></span>
+<span class="line"><span>→ fix → wait for the next release</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Now (root cause in seconds, fixed in the next build)</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>Screenshot + one sentence → AI reads logs, finds root cause</span></span>
+<span class="line"><span>→ files the issue → fixes it</span></span>
+<span class="line"><span>→ independent review → auto release, auto install</span></span></code></pre>
+<p>Here’s the interesting part: not a single step was removed. What disappeared were the people and the waiting. In the old world, the slowest step was rarely technical — it was the organizational question of “whose bug is this?” That step no longer exists.</p>
+<h2 id="the-flywheel-took-two-days-to-fix">The Flywheel Took Two Days to Fix</h2>
+<p>It did not work the moment we set it up. Over two days, almost every link in the chain broke at least once:</p>
+<ul>
+<li>I said, “Skip the tests, ship straight to production.” Hours later, a real bug shipped — but the freshly built pipeline caught it: auto-filed, root-caused, fixed, merged.</li>
+<li>I asked, “Who actually approves the merges?” It turned out the same identity was writing the code and approving it — the author reviewing itself. We built a separate reviewer identity with isolated credentials. Now every merge needs its independent sign-off.</li>
+<li>I said, “Install every new build immediately, don’t wait.” It installed a broken package and the App stopped working entirely — and the monitoring never noticed. That’s how we found the blind spot.</li>
+<li>A release failed and it reported, “Rolled back safely.” I got angry: I want the feature to work, not a successful rollback. From that day, “done” was redefined: it counts only when it works on the real phone. It started patrolling the phone for bugs itself, and its first honest report was not good news — four problems, including a guaranteed crash.</li>
+<li>I said, “Tonight you run on your own, I’m not managing anything.” Sixteen minutes later, the system stalled, and I had to send a message to wake it up.</li>
+</ul>
+<p>Even the reporting itself failed once: a late-night status update claimed six issues closed. I checked — it was five. The sixth had regressed the same night.</p>
+<p>This magical flywheel got spinning by stepping in every one of these holes. And it still has holes today.</p>
+<h2 id="no-single-piece-is-enough">No Single Piece Is Enough</h2>
+<p>Someone asked me: telemetry, logs, independent review, automatic dispatch — if you could only keep one, which one?</p>
+<p>None. Remove any single piece and the flywheel stops.</p>
+<p>Most people use AI for a point improvement — writing code faster. What we sped up is the entire loop: reporting, root-causing, fixing, reviewing, releasing, installing. Every link is faster, and the links feed each other. That’s where the 10x or 20x comes from. And the human involvement is minimal: I do exactly two things — drop screenshots, and make calls.</p>
+<p>That’s why this morning felt so special. Not because something was finished — Milestone 1 still isn’t done. But because I slept through the night, and it kept running.</p>
+<p>For a moment, it genuinely felt like a dream coming true.</p>
+</div><footer class="article-end"><span aria-hidden="true"></span><p>That's it for this entry.</p><a href="/en/">Read the other articles</a></footer></article></main><footer class="site-footer"><div><span>Codier</span><span>Field notes from working with AI agents.</span></div></footer><script>(function(){const lang = "en";
+const alternatePath = "/posts/bug-reporting-flywheel/";
+
+      (() => {
+        const storageKey = 'codier-language';
+        const currentLanguage = lang;
+        const counterpart = alternatePath;
+        let preference = null;
+
+        try {
+          preference = localStorage.getItem(storageKey);
+        } catch {
+          preference = null;
+        }
+
+        const explicitLanguage = location.hash === '#language-zh'
+          ? 'zh'
+          : location.hash === '#language-en' ? 'en' : null;
+
+        if (explicitLanguage) {
+          try {
+            localStorage.setItem(storageKey, explicitLanguage);
+            preference = explicitLanguage;
+          } catch {
+            preference = explicitLanguage;
+          }
+        }
+
+        const browserLanguage = (navigator.languages?.[0] || navigator.language || '').toLowerCase();
+        const desiredLanguage = explicitLanguage || (preference === 'zh' || preference === 'en'
+          ? preference
+          : browserLanguage.startsWith('zh') ? 'zh' : 'en');
+
+        if (desiredLanguage !== currentLanguage) {
+          location.replace(counterpart);
+          return;
+        }
+
+        document.querySelector('[data-language-switch]')?.addEventListener('click', (event) => {
+          const target = event.currentTarget.getAttribute('data-language-switch');
+          if (target !== 'zh' && target !== 'en') return;
+          try {
+            localStorage.setItem(storageKey, target);
+          } catch {
+            // The normal language link still works when storage is unavailable.
+          }
+        });
+      })();
+    })();</script></body></html>

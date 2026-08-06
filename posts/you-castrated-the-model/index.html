@@ -1,0 +1,78 @@
+<!DOCTYPE html><html lang="zh-CN" data-current-language="zh"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#f5f0e8"><meta name="description" content="三个看似无关的 Bug，让我发现我们写了太多规则，替 AI 做了它本来会做的判断。当天，我们停掉零散修补，确定了新的架构方向，并把后续工作重新排进计划。"><meta name="generator" content="Astro v7.1.6"><link rel="canonical" href="https://codier.github.io/posts/you-castrated-the-model/"><link rel="alternate" hreflang="zh-CN" href="https://codier.github.io/posts/you-castrated-the-model/"><link rel="alternate" hreflang="en" href="https://codier.github.io/en/posts/you-castrated-the-model/"><link rel="alternate" hreflang="x-default" href="https://codier.github.io/posts/you-castrated-the-model/"><link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="alternate" type="application/rss+xml" title="Codier 中文 RSS" href="/rss.xml"><meta property="og:site_name" content="Codier"><meta property="og:type" content="article"><meta property="og:locale" content="zh_CN"><meta property="og:title" content="你把模型阉割了：一句吐槽引发的当场架构大反转 · Codier"><meta property="og:description" content="三个看似无关的 Bug，让我发现我们写了太多规则，替 AI 做了它本来会做的判断。当天，我们停掉零散修补，确定了新的架构方向，并把后续工作重新排进计划。"><meta property="og:url" content="https://codier.github.io/posts/you-castrated-the-model/"><meta property="article:published_time" content="2026-08-06T00:00:00.000Z"><title>你把模型阉割了：一句吐槽引发的当场架构大反转 · Codier</title><link rel="stylesheet" href="/_astro/BaseLayout.C0Il_AHh.css"></head><body data-alternate-path="/en/posts/you-castrated-the-model/"><a class="skip-link" href="#main-content">跳到正文</a><header class="site-header"><div class="header-inner"><a class="wordmark" href="/" aria-label="Codier 首页">Codier</a><div class="header-actions"><nav aria-label="主导航"><a href="/#articles">文章</a><a href="/rss.xml">RSS</a></nav><a class="language-switch" href="/en/posts/you-castrated-the-model/#language-en" hreflang="en" data-language-switch="en" aria-label="Switch to English">English</a></div></div></header><main id="main-content"><article class="article-shell"><header class="article-header"><a class="back-link" href="/">← 返回首页</a><p class="eyebrow">实践记录</p><h1>你把模型阉割了：一句吐槽引发的当场架构大反转</h1><p class="article-summary">三个看似无关的 Bug，让我发现我们写了太多规则，替 AI 做了它本来会做的判断。当天，我们停掉零散修补，确定了新的架构方向，并把后续工作重新排进计划。</p><div class="article-meta"><time datetime="2026-08-06T00:00:00.000Z">2026年8月6日</time><span aria-hidden="true">·</span><span>ai-agent / architecture / product / dogfood</span></div></header><section class="audio-card" aria-labelledby="audio-title-zh"><div class="audio-heading"><div><p class="eyebrow">语音版</p><h2 id="audio-title-zh">你把模型阉割了：一句吐槽引发的当场架构大反转</h2></div><a class="download-link" href="/posts/you-castrated-the-model/audio/you-castrated-the-model.mp3" download>下载 MP3</a></div><audio controls preload="metadata" src="/posts/you-castrated-the-model/audio/you-castrated-the-model.mp3">你的浏览器不支持音频播放，可以<a href="/posts/you-castrated-the-model/audio/you-castrated-the-model.mp3" download>直接下载 MP3</a>。</audio></section><div class="article-body"><p>那天我拿着手机测试自己正在做的 AI 应用，越测越不对劲。</p>
+<p>我问附近有什么餐厅，它报错。问最近上映的电影，它说自己没有实时资料，下面却一本正经地写着“高置信度”。问天气，它没搞清楚我在哪座城市，居然偷偷换了一个猜出来的城市，最后还是“高置信度”。</p>
+<p>三个问题看起来互不相干。最初摆在我面前的修法也很自然：</p>
+<ul>
+<li>给电影问题再加一条识别规则；</li>
+<li>给地点问题再补一个解析办法；</li>
+<li>给“高置信度”再加一道限制。</li>
+</ul>
+<p>也就是继续写代码，继续堵洞。</p>
+<p>但我突然觉得，方向可能从根上就错了。</p>
+<p>我每天都在用另一个 AI 助手。它常常会自己判断要不要搜索、要不要先问地点。我没为它另写一套“看到这个词就走这条路”的规则。</p>
+<p>我把两边的表现放在一起看，然后对正在做这个应用的 AI 说：你们写了大量代码，把模型阉割了。它本来会做的事，被你们挡住了。这已经违背了做这个产品的初衷。</p>
+<p>我还特意补了一句：先别改，也别只会同意我。如果你觉得我说错了，就反驳。</p>
+<h2 id="它说你大概对了-80">它说：你大概对了 80%</h2>
+<p>AI 回去审了一遍，没有全盘认错，也没有替自己辩护。</p>
+<p>它说，我大概对了 80%。剩下那 20% 是：另一个 AI 助手并不是真的“裸模型”。它背后的工具、权限和安全系统其实更多。</p>
+<p>区别不在于有没有外壳，而在于外壳站在哪里。</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="text"><code><span class="line"><span>以前：程序先猜我在问什么 → 替 AI 选好路线 → AI 接手剩下的部分</span></span>
+<span class="line"><span>新方向：AI 先理解问题 → 决定回答、追问还是查资料 → 程序守住边界</span></span></code></pre>
+<p>我们的代码不是在帮助模型，而是在模型看到问题之前，先替它做决定。</p>
+<p>结果就是一个很荒唐的产品：代码更多，能力反而更弱。</p>
+<h2 id="当场停掉不再打补丁">当场停掉，不再打补丁</h2>
+<p>这次审计之后，正在进行的那批“再加几条规则”的修复被立即冻结。</p>
+<p>我们当天把新方向写进了项目计划：不再继续往那套“先猜用户在问什么”的规则里打补丁。新的设计目标是让 AI 自己理解问题、选择工具；应用负责把过程和结果呈现清楚，并守住权限、隐私和外部操作的边界。每个用户背后则准备一套彼此隔离的运行环境，避免数据和权限混在一起。</p>
+<p>原来的零散修补被收起，新方向也被拆成一套任务重新排队。</p>
+<p>但我不想把故事讲得太漂亮。那天完成的是停掉旧方向、决定新方向并重新立项。新架构还没有做完，更没有证明它已经解决了开头那三个问题。</p>
+<p>护栏当然需要。用户之间的数据要隔离，位置和隐私要经过授权，发邮件、下单这类动作要确认，AI 给出的事实也要能查来源。</p>
+<p>只是这次以后，每当我们想再加一条规则，我大概都会先问一句：</p>
+<p>这条规则是在保护用户，还是只是在抢着替模型回答？</p>
+</div><footer class="article-end"><span aria-hidden="true"></span><p>这篇记录到这里。</p><a href="/">继续读其他文章</a></footer></article></main><footer class="site-footer"><div><span>Codier</span><span>记录与 AI agent 一起工作的现场。</span></div></footer><script>(function(){const lang = "zh";
+const alternatePath = "/en/posts/you-castrated-the-model/";
+
+      (() => {
+        const storageKey = 'codier-language';
+        const currentLanguage = lang;
+        const counterpart = alternatePath;
+        let preference = null;
+
+        try {
+          preference = localStorage.getItem(storageKey);
+        } catch {
+          preference = null;
+        }
+
+        const explicitLanguage = location.hash === '#language-zh'
+          ? 'zh'
+          : location.hash === '#language-en' ? 'en' : null;
+
+        if (explicitLanguage) {
+          try {
+            localStorage.setItem(storageKey, explicitLanguage);
+            preference = explicitLanguage;
+          } catch {
+            preference = explicitLanguage;
+          }
+        }
+
+        const browserLanguage = (navigator.languages?.[0] || navigator.language || '').toLowerCase();
+        const desiredLanguage = explicitLanguage || (preference === 'zh' || preference === 'en'
+          ? preference
+          : browserLanguage.startsWith('zh') ? 'zh' : 'en');
+
+        if (desiredLanguage !== currentLanguage) {
+          location.replace(counterpart);
+          return;
+        }
+
+        document.querySelector('[data-language-switch]')?.addEventListener('click', (event) => {
+          const target = event.currentTarget.getAttribute('data-language-switch');
+          if (target !== 'zh' && target !== 'en') return;
+          try {
+            localStorage.setItem(storageKey, target);
+          } catch {
+            // The normal language link still works when storage is unavailable.
+          }
+        });
+      })();
+    })();</script></body></html>
